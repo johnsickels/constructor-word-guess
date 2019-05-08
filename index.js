@@ -1,16 +1,137 @@
-// * **index.js**: The file containing the logic for the course of the game, which depends on `Word.js` and:
+var inquirer = require("inquirer");
 
-//   * Randomly selects a word and uses the `Word` constructor to store it
-let wordsToGuess = ["pizza", "tacos", "spaghetti", "ribeye", "grouper"];
-let wordSelection = Math.floor(Math.random() * wordsToGuess.length);
-let wordToGuess = wordsToGuess[wordSelection];
-console.log(wordToGuess);
-//   * Prompts the user for each guess and keeps track of the user's remaining guesses
+var Word = require("./Word.js");
 
-// 3. `Letter.js` *should not* `require` any other files.
+var guesses = 10;
+var points = 0;
 
-// 4. `Word.js` *should only* require `Letter.js`
+var wordsToGuess = ["hawaiian pizza", "fish tacos", "spaghetti and meatballs", "bacon cheeseburger", "chicken pad thai", "singapore noodles", "miso ramen"];
+var randomWord;
+var chosenWord;
 
-// 5. **HINT:** Write `Letter.js` first and test it on its own before moving on, then do the same thing with `Word.js`
+function startGame() {
 
-// 6. **HINT:** If you name your letter's display function `toString`, JavaScript will call that function automatically whenever casting that object to a string (check out this example: <https://jsbin.com/facawetume/edit?js,console>)
+    console.log("It's time to guess the food!");
+}
+
+function chooseRandomWord() {
+
+    randomWord = wordsToGuess[Math.floor(Math.random() * wordsToGuess.length)]
+
+    chosenWord = new Word(randomWord);
+}
+
+function guessWord() {
+
+    if (guesses > 0 && points < 5) {
+
+        console.log(chosenWord.display());
+    
+
+        inquirer.prompt([
+            {
+                name: "txt",
+                message: "Guess a letter!",
+                validate: function (str) {
+                    if (str.length != 1) return false;
+                    var regEx = new RegExp("^[a-zA-Z\s]{1,1}$");
+                    return regEx.test(str);
+                }
+
+            }
+
+        ]).then(function (guessedLetter) {
+
+            var guess = guessedLetter.txt;
+
+            chosenWord.checkGuess(guess);
+
+            if (randomWord.toLowerCase().indexOf(guess.toLowerCase()) === -1) {
+                guesses--;
+                console.log("INCORRECT! " + guesses + " guesses remaining")
+            } 
+            else {
+                if (points < 5) {
+                console.log("CORRECT!")
+                }
+            }
+
+            if (randomWord === chosenWord.display()) {
+                console.log(chosenWord.display());
+                guesses = 10;
+                points++;
+
+                if (points < 5) {
+                    console.log("CORRECT! Next menu item!");
+                    chooseRandomWord();
+                }
+
+                else {
+                    winGame();
+                }
+            }
+
+            if (guesses === 0) {
+                loseGame();
+            }
+
+            guessWord();
+
+        });
+    }
+
+}
+
+function loseGame() {
+    console.log("GAME OVER!");
+    inquirer.prompt([
+        {
+            name: "confirm",
+            type: "confirm",
+            message: "Play again?",
+            default: true
+        }
+    ])
+        .then(function (inquirerResponse) {
+            if (inquirerResponse.confirm) {
+                guesses = 10;
+                points = 0;
+                chooseRandomWord();
+                guessWord();
+            }
+            else {
+                console.log("1 star... would not play again");
+                process.exit();
+            }
+        })
+}
+
+function winGame() {
+
+    console.log('YOU WIN!')
+    inquirer.prompt([
+        {
+            name: "confirm",
+            type: "confirm",
+            message: "Play again?",
+            default: true
+        }
+    ])
+        .then(function (inquirerResponse) {
+            if (inquirerResponse.confirm) {
+                guesses = 10;
+                points = 0;
+                chooseRandomWord();
+                guessWord();
+            }
+            else {
+                console.log("Thank you come again!")
+                process.exit();
+            }
+        })
+
+}
+
+startGame();
+chooseRandomWord();
+guessWord();
