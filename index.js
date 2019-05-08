@@ -1,7 +1,10 @@
 // * **index.js**: The file containing the logic for the course of the game, which depends on `Word.js` and:
 
 //   * Randomly selects a word and uses the `Word` constructor to store it
-
+let wordsToGuess = ["pizza", "tacos", "spaghetti", "ribeye", "grouper"];
+let wordSelection = Math.floor(Math.random() * wordsToGuess.length);
+let wordToGuess = wordsToGuess[wordSelection];
+console.log(wordToGuess);
 //   * Prompts the user for each guess and keeps track of the user's remaining guesses
 
 // 3. `Letter.js` *should not* `require` any other files.
